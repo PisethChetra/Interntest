@@ -1,0 +1,275 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Management</title>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link rel="stylesheet" href="table.css">
+
+
+</head>
+<body>
+<div class="container">
+
+    <h2>User Information</h2>
+
+    <div class="top">
+        <input type="text" id="searchInput" class="search-input"
+               placeholder="Search user...">
+
+        <div>
+            <button class="add-btn" id="addBtn">+ Add</button>
+            <button class="remove-btn" id="removeBtn">✕ Remove</button>
+        </div>
+    </div>
+
+    <table id="userTable">
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="selectAll"></th>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Sex</th>
+                <th>Date of Birth</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+</div>
+
+<!-- Add / Edit Modal -->
+<div class="user-modal" id="userModal">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+            <h3 id="modalTitle">Add New</h3>
+            <button id="closeBtn">×</button>
+        </div>
+
+        <p class="error-message" id="errorMessage"></p>
+
+        <form class="user-form" id="userForm">
+
+            <input type="hidden" id="userId">
+
+            <div>
+                <label>Full Name</label>
+                <input type="text" id="fullName">
+            </div>
+
+            <div>
+                <label>Sex</label>
+                <select id="gender">
+                    <option value="">N/A</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Date of Birth</label>
+                <input type="date" id="birthDate">
+            </div>
+
+            <div>
+                <label>Email</label>
+                <input type="email" id="email">
+            </div>
+
+            <div>
+                <label>Phone Number</label>
+                <input type="tel" id="phone">
+            </div>
+
+        </form>
+
+        <div class="modal-footer">
+            <button class="save-btn" id="saveBtn">✓ Create</button>
+            <button class="close-btn" id="closeModalBtn">✕ Close</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+
+    var nextUserId = 1;
+
+    // Open Add Modal
+    $("#addBtn").click(function() {
+        $("#userForm")[0].reset();
+        $("#userId").val("");
+        $("#modalTitle").text("Add New");
+        $("#saveBtn").text("✓ Create");
+        $("#errorMessage").text("");
+        $("#userModal").fadeIn();
+    });
+
+    // Close Modal
+    $("#closeBtn, #closeModalBtn").click(function() {
+        $("#userModal").fadeOut();
+    });
+    // Save User
+    $("#saveBtn").click(function() {
+
+        var userId = Number($("#userId").val());
+        var fullName = $("#fullName").val().trim();
+        var gender = $("#gender").val();
+        var birthDate = $("#birthDate").val();
+        var email = $("#email").val().trim();
+        var phone = $("#phone").val().trim();
+
+        // Check empty fields
+        if (!fullName || !gender || !birthDate || !email || !phone) {
+            $("#errorMessage").text("Please fill in all fields!");
+            return;
+        }
+        // Check email
+        if (!$("#email")[0].checkValidity()) {
+            $("#errorMessage").text("Invalid email!");
+            return;
+        }
+        // Check phone
+     if (isNaN(phone) || phone.length < 8 || phone.length > 15) {
+    $("#errorMessage").text("Invalid phone number!");
+    return;
+}
+
+      // Check duplicate data
+var duplicate = false;
+
+$("#userTable tbody tr").each(function() {
+
+    var row = $(this);
+
+    var oldId = Number(row.attr("data-id"));
+    var oldEmail = row.find(".user-email").text();
+    var oldPhone = row.find(".user-phone").text();
+    var oldName = row.find(".user-name").text();
+    var oldBirth = row.find(".user-birth").text();
+
+    if (oldId !== userId) {
+
+        if (oldEmail.toLowerCase() === email.toLowerCase()) {
+            duplicate = true;
+        }
+
+        if (oldPhone === phone) {
+            duplicate = true;
+        }
+
+        if (oldName.toLowerCase() === fullName.toLowerCase() && oldBirth === birthDate) {
+            duplicate = true;
+        }
+
+    }
+
+});
+
+if (duplicate === true) {
+    $("#errorMessage").text("User already exists!");
+    return;
+}
+
+        // Update User
+        if (userId) {
+
+            var userRow = $('#userTable tr[data-id="' + userId + '"]');
+
+            userRow.find(".user-name").text(fullName);
+            userRow.find(".user-gender").text(gender);
+            userRow.find(".user-birth").text(birthDate);
+            userRow.find(".user-email").text(email);
+            userRow.find(".user-phone").text(phone);
+
+        } else {
+
+            // Add New User
+            var userRow = $("<tr>").attr("data-id", nextUserId);
+
+            userRow.append('<td><input type="checkbox" class="user-check"></td>');
+            userRow.append($("<td>").text(nextUserId));
+            userRow.append($("<td>").addClass("user-name").text(fullName));
+            userRow.append($("<td>").addClass("user-gender").text(gender));
+            userRow.append($("<td>").addClass("user-birth").text(birthDate));
+            userRow.append($("<td>").addClass("user-email").text(email));
+            userRow.append($("<td>").addClass("user-phone").text(phone));
+            userRow.append('<td><button class="edit-btn">Edit</button></td>');
+
+            $("#userTable tbody").append(userRow);
+
+            nextUserId++;
+        }
+
+        $("#userModal").fadeOut();
+        $("#userForm")[0].reset();
+    });
+
+    // Edit User
+    $("#userTable").on("click", ".edit-btn", function() {
+
+        var userRow = $(this).closest("tr");
+
+        $("#userId").val(userRow.attr("data-id"));
+        $("#fullName").val(userRow.find(".user-name").text());
+        $("#gender").val(userRow.find(".user-gender").text());
+        $("#birthDate").val(userRow.find(".user-birth").text());
+        $("#email").val(userRow.find(".user-email").text());
+        $("#phone").val(userRow.find(".user-phone").text());
+
+        $("#modalTitle").text("Edit User");
+        $("#saveBtn").text("✓ Update");
+        $("#errorMessage").text("");
+
+        $("#userModal").fadeIn();
+    });
+
+    // Select All Users
+    $("#selectAll").change(function() {
+        $(".user-check:visible").prop("checked", this.checked);
+    });
+
+    // Delete Selected Users
+    $("#removeBtn").click(function() {
+
+        if ($(".user-check:checked").length === 0) {
+            alert("Please select a user!");
+            return;
+        }
+
+        if (confirm("Are you sure you want to delete?")) {
+
+            $(".user-check:checked").each(function() {
+                $(this).closest("tr").remove();
+            });
+
+            $("#selectAll").prop("checked", false);
+        }
+    });
+
+    // Search Users
+    $("#searchInput").on("input", function() {
+
+        var searchValue = $(this).val().toLowerCase();
+
+        $("#userTable tbody tr").each(function() {
+            $(this).toggle($(this).text().toLowerCase().includes(searchValue));
+        });
+
+        $("#selectAll").prop("checked", false);
+    });
+
+});
+</script>
+
+</body>
+</html>

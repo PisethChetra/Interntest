@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>jQuery Traversal Test</title>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <style>
+        ul {
+            width: 250px;
+            padding: 20px;
+            border: 2px solid black;
+        }
+
+        li {
+            padding: 10px;
+            margin: 5px;
+            background: lightgray;
+        }
+
+        .active {
+            background: orange;
+            font-weight: bold;
+        }
+
+        button {
+            margin: 5px;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>jQuery Traversal Methods</h2>
+
+    <ul>
+        <li>Apple</li>
+        <li>Banana</li>
+        <li class="active">Orange (Selected)</li>
+        <li>Grape</li>
+        <li>Mango</li>
+        <li>Watermelon</li>
+    </ul>
+
+    <button onclick="test('siblings')">siblings()</button>
+    <button onclick="test('next')">next()</button>
+    <button onclick="test('nextAll')">nextAll()</button>
+    <button onclick="test('nextUntil')">nextUntil()</button>
+    <button onclick="test('prev')">prev()</button>
+    <button onclick="test('prevAll')">prevAll()</button>
+    <button onclick="test('prevUntil')">prevUntil()</button>
+
+    <button onclick="location.reload()">Reset</button>
+
+    <script>
+        function test(method) {
+            $("li").css("background", "lightgray");
+
+            let result;
+
+            if (method == "siblings") {
+                result = $(".active").siblings();
+            }
+            else if (method == "next") {
+                result = $(".active").next();
+            }
+            else if (method == "nextAll") {
+                result = $(".active").nextAll();
+            }
+            else if (method == "nextUntil") {
+                result = $(".active").nextUntil("li:last");
+            }
+            else if (method == "prev") {
+                result = $(".active").prev();
+            }
+            else if (method == "prevAll") {
+                result = $(".active").prevAll();
+            }
+            else if (method == "prevUntil") {
+                result = $(".active").prevUntil("li:first");
+            }
+
+            result.css("background", "yellow");
+        }
+    </script>
+
+</body>
+</html>
